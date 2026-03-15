@@ -187,7 +187,8 @@ section h3 {
   margin-top: auto;
   padding-top: 10px;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  gap: 6px;
 }
 
 /* Activity Tag */
@@ -663,4 +664,98 @@ footer {
 
 #logout-button:hover {
   background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* Share button on activity cards */
+.share-button {
+  background-color: transparent;
+  color: var(--primary);
+  border: 1px solid var(--border);
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  letter-spacing: 0.3px;
+}
+
+.share-button:hover {
+  background-color: var(--primary-light);
+  color: white;
+  border-color: var(--primary-light);
+}
+
+/* Share modal - platform option grid */
+.share-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.share-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+  border: none;
+  text-align: center;
+  color: white;
+}
+
+.share-option:hover {
+  opacity: 0.85;
+}
+
+.share-twitter {
+  background-color: #000000;
+}
+
+.share-facebook {
+  background-color: #1877f2;
+}
+
+.share-whatsapp {
+  background-color: #25d366;
+}
+
+.share-email {
+  background-color: var(--primary);
+}
+
+.share-copy {
+  background-color: var(--text-secondary);
+  grid-column: span 2;
+}
+
+/* Feedback message after copying link */
+.share-copy-feedback {
+  text-align: center;
+  color: var(--success);
+  font-size: 0.85rem;
+  margin-top: 10px;
+  padding: 6px;
+  background-color: var(--success-light);
+  border-radius: 4px;
+}
+
+/* Description text in share modal */
+.share-description {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin-top: 4px;
+  line-height: 1.4;
 }
