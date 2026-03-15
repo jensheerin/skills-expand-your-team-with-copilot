@@ -102,6 +102,25 @@
                 <button class="time-filter" data-time="weekend">Weekend</button>
               </div>
             </div>
+
+            <!-- Difficulty Filter -->
+            <div class="filter-container difficulty-filter-container">
+              <div class="filter-label">Filter by difficulty:</div>
+              <div class="difficulty-filters" id="difficulty-filters">
+                <button class="difficulty-filter active" data-difficulty="">
+                  All
+                </button>
+                <button class="difficulty-filter" data-difficulty="Beginner">
+                  Beginner
+                </button>
+                <button class="difficulty-filter" data-difficulty="Intermediate">
+                  Intermediate
+                </button>
+                <button class="difficulty-filter" data-difficulty="Advanced">
+                  Advanced
+                </button>
+              </div>
+            </div>
           </aside>
 
           <!-- Activities Content -->
@@ -168,6 +187,33 @@
           <button type="submit">Login</button>
         </form>
         <div id="login-message" class="hidden message"></div>
+      </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div id="share-modal" class="modal hidden">
+      <div class="modal-content">
+        <span class="close-share-modal">&times;</span>
+        <h3>Share <span id="share-activity-name"></span></h3>
+        <p id="share-activity-description" class="share-description"></p>
+        <div class="share-options">
+          <a id="share-twitter" class="share-option share-twitter" target="_blank" rel="noopener noreferrer">
+            𝕏 X
+          </a>
+          <a id="share-facebook" class="share-option share-facebook" target="_blank" rel="noopener noreferrer">
+            Facebook
+          </a>
+          <a id="share-whatsapp" class="share-option share-whatsapp" target="_blank" rel="noopener noreferrer">
+            WhatsApp
+          </a>
+          <a id="share-email" class="share-option share-email">
+            ✉️ Email
+          </a>
+          <button id="share-copy-link" class="share-option share-copy">
+            📋 Copy Link
+          </button>
+        </div>
+        <p id="share-copy-feedback" class="hidden share-copy-feedback">✅ Link copied to clipboard!</p>
       </div>
     </div>
 

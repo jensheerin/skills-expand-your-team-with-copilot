@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const categoryFilters = document.querySelectorAll(".category-filter");
   const dayFilters = document.querySelectorAll(".day-filter");
   const timeFilters = document.querySelectorAll(".time-filter");
+  const difficultyFilters = document.querySelectorAll(".difficulty-filter");
 
   // Authentication elements
   const loginButton = document.getElementById("login-button");
@@ -25,26 +26,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeLoginModal = document.querySelector(".close-login-modal");
   const loginMessage = document.getElementById("login-message");
 
-  // Dark mode elements
-  const darkModeToggle = document.getElementById("dark-mode-toggle");
-  const darkModeIcon = document.getElementById("dark-mode-icon");
-
-  // Initialize dark mode from saved preference
-  if (localStorage.getItem("darkMode") === "true") {
-    document.body.classList.add("dark-mode");
-    darkModeIcon.textContent = "☀️";
-    darkModeToggle.setAttribute("aria-label", "Switch to light mode");
-    darkModeToggle.setAttribute("title", "Switch to light mode");
-  }
-
-  // Toggle dark mode on button click
-  darkModeToggle.addEventListener("click", () => {
-    const isDark = document.body.classList.toggle("dark-mode");
-    darkModeIcon.textContent = isDark ? "☀️" : "🌙";
-    darkModeToggle.setAttribute("aria-label", isDark ? "Switch to light mode" : "Toggle dark mode");
-    darkModeToggle.setAttribute("title", isDark ? "Switch to light mode" : "Toggle dark mode");
-    localStorage.setItem("darkMode", isDark);
-  });
+  // Share modal elements
+  const shareModal = document.getElementById("share-modal");
+  const shareActivityNameEl = document.getElementById("share-activity-name");
+  const shareActivityDescriptionEl = document.getElementById("share-activity-description");
+  const closeShareModalBtn = document.querySelector(".close-share-modal");
+  const shareCopyFeedback = document.getElementById("share-copy-feedback");
 
   // Activity categories with corresponding colors
   const activityTypes = {
@@ -61,6 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let searchQuery = "";
   let currentDay = "";
   let currentTimeRange = "";
+  let currentDifficulty = "";
 
   // Authentication state
   let currentUser = null;
@@ -275,6 +263,77 @@ document.addEventListener("DOMContentLoaded", () => {
     await login(username, password);
   });
 
+  // Open share modal
+  function openShareModal(name, details) {
+    const formattedSchedule = formatSchedule(details);
+    const shareTitle = `${name} - Mergington High School`;
+    const shareText = `Check out ${name} at Mergington High School! ${details.description} Schedule: ${formattedSchedule}`;
+    const shareUrl = window.location.href;
+
+    // Use the Web Share API on supported devices (e.g. mobile)
+    if (navigator.share) {
+      navigator.share({ title: shareTitle, text: shareText, url: shareUrl }).catch((err) => {
+        if (err.name !== "AbortError") {
+          console.error("Error sharing:", err);
+        }
+      });
+      return;
+    }
+
+    // Fallback: populate and show the share modal
+    const encodedText = encodeURIComponent(shareText);
+    const encodedUrl = encodeURIComponent(shareUrl);
+    const encodedTitle = encodeURIComponent(shareTitle);
+
+    document.getElementById("share-twitter").href =
+      `https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`;
+    document.getElementById("share-facebook").href =
+      `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+    document.getElementById("share-whatsapp").href =
+      `https://wa.me/?text=${encodedText}%20${encodedUrl}`;
+    document.getElementById("share-email").href =
+      `mailto:?subject=${encodedTitle}&body=${encodedText}%0A%0A${encodedUrl}`;
+    document.getElementById("share-copy-link").dataset.url = shareUrl;
+
+    shareActivityNameEl.textContent = name;
+    shareActivityDescriptionEl.textContent = details.description;
+    shareCopyFeedback.classList.add("hidden");
+
+    shareModal.classList.remove("hidden");
+    setTimeout(() => {
+      shareModal.classList.add("show");
+    }, 10);
+  }
+
+  // Close share modal
+  function closeShareModalHandler() {
+    shareModal.classList.remove("show");
+    setTimeout(() => {
+      shareModal.classList.add("hidden");
+    }, 300);
+  }
+
+  closeShareModalBtn.addEventListener("click", closeShareModalHandler);
+
+  window.addEventListener("click", (event) => {
+    if (event.target === shareModal) {
+      closeShareModalHandler();
+    }
+  });
+
+  // Copy link handler
+  document.getElementById("share-copy-link").addEventListener("click", (event) => {
+    const url = event.currentTarget.dataset.url || window.location.href;
+    navigator.clipboard.writeText(url).then(() => {
+      shareCopyFeedback.classList.remove("hidden");
+      setTimeout(() => {
+        shareCopyFeedback.classList.add("hidden");
+      }, 3000);
+    }).catch((err) => {
+      console.error("Failed to copy link:", err);
+    });
+  });
+
   // Show loading skeletons
   function showLoadingSkeletons() {
     activitiesList.innerHTML = "";
@@ -413,6 +472,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
+      // Handle difficulty filter
+      if (currentDifficulty) {
+        queryParams.push(`difficulty=${encodeURIComponent(currentDifficulty)}`);
+      }
+
       const queryString =
         queryParams.length > 0 ? `?${queryParams.join("&")}` : "";
       const response = await fetch(`/activities${queryString}`);
@@ -527,6 +591,11 @@ document.addEventListener("DOMContentLoaded", () => {
       </span>
     `;
 
+    // Create difficulty badge (only shown if difficulty is specified)
+    const difficultyBadgeHtml = details.difficulty
+      ? `<span class="difficulty-badge difficulty-${details.difficulty.toLowerCase()}">${details.difficulty}</span>`
+      : "";
+
     // Create capacity indicator
     const capacityIndicator = `
       <div class="capacity-container ${capacityStatusClass}">
@@ -542,6 +611,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     activityCard.innerHTML = `
       ${tagHtml}
+      ${difficultyBadgeHtml}
       <h4>${name}</h4>
       <p>${details.description}</p>
       <p class="tooltip">
@@ -589,6 +659,9 @@ document.addEventListener("DOMContentLoaded", () => {
           </div>
         `
         }
+        <button class="share-button" data-activity="${name}" aria-label="Share ${name}">
+          🔗 Share
+        </button>
       </div>
     `;
 
@@ -607,6 +680,12 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       }
     }
+
+    // Add click handler for share button
+    const shareButton = activityCard.querySelector(".share-button");
+    shareButton.addEventListener("click", () => {
+      openShareModal(name, details);
+    });
 
     activitiesList.appendChild(activityCard);
   }
@@ -658,6 +737,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Update current time filter and fetch activities
       currentTimeRange = button.dataset.time;
+      fetchActivities();
+    });
+  });
+
+  // Add event listeners for difficulty filter buttons
+  difficultyFilters.forEach((button) => {
+    button.addEventListener("click", () => {
+      // Update active class
+      difficultyFilters.forEach((btn) => btn.classList.remove("active"));
+      button.classList.add("active");
+
+      // Update current difficulty filter and fetch activities
+      currentDifficulty = button.dataset.difficulty;
       fetchActivities();
     });
   });
